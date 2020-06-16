@@ -84,6 +84,7 @@ find_package(CppUnit)
 SET(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
 SET(BUILD_SHARED_LIBS OFF)
 SET(CMAKE_EXE_LINKER_FLAGS "-static")
+SET(Boost_USE_STATIC_LIBS   ON)
 
 set(GR_REQUIRED_COMPONENTS ANALOG DIGITAL RUNTIME BLOCKS FILTER PMT FFT)
 find_package(Gnuradio REQUIRED COMPONENTS analog blocks digital filter fft)
@@ -118,8 +119,7 @@ find_package(CURL REQUIRED)
 # Setup boost
 ########################################################################
 MESSAGE(STATUS "Configuring Boost C++ Libraries...")
-ADD_DEFINITIONS(-DBoost_USE_STATIC_LIBS)
-set(Boost_USE_STATIC_LIBS ON)
+
 # Although not required on my system, some users have linking issues without
 SET(BOOST_REQUIRED_COMPONENTS
     thread

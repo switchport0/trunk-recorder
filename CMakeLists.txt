@@ -118,7 +118,8 @@ find_package(CURL REQUIRED)
 # Setup boost
 ########################################################################
 MESSAGE(STATUS "Configuring Boost C++ Libraries...")
-
+ADD_DEFINITIONS(-DBoost_USE_STATIC_LIBS)
+set(Boost_USE_STATIC_LIBS ON)
 # Although not required on my system, some users have linking issues without
 SET(BOOST_REQUIRED_COMPONENTS
     thread
@@ -152,8 +153,7 @@ if(NOT Boost_FOUND)
     message(FATAL_ERROR "Boost required to build " ${CMAKE_PROJECT_NAME})
 endif()
 
-ADD_DEFINITIONS(-DBoost_USE_STATIC_LIBS)
-set(Boost_USE_STATIC_LIBS ON)
+
 #ADD_DEFINITIONS(-DBOOST_ALL_DYN_LINK)
 add_definitions(-DGNURADIO_VERSION=${GNURADIO_VERSION})
 

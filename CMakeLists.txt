@@ -152,7 +152,7 @@ if(NOT Boost_FOUND)
     message(FATAL_ERROR "Boost required to build " ${CMAKE_PROJECT_NAME})
 endif()
 
-ADD_DEFINITIONS(-DBOOST_ALL_DYN_LINK)
+#ADD_DEFINITIONS(-DBOOST_ALL_DYN_LINK)
 add_definitions(-DGNURADIO_VERSION=${GNURADIO_VERSION})
 
 ########################################################################

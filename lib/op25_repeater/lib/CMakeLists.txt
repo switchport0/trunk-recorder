@@ -24,6 +24,7 @@ include(GrPlatform) #define LIB_SUFFIX
 SET(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
 SET(BUILD_SHARED_LIBS OFF)
 SET(CMAKE_EXE_LINKER_FLAGS "-static")
+set(Boost_USE_STATIC_LIBS   ON)
 include_directories(${Boost_INCLUDE_DIR})
 link_directories(${Boost_LIBRARY_DIRS})
 list(APPEND op25_repeater_sources

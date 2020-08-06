@@ -93,7 +93,7 @@ void p25_recorder::initialize_prefilter() {
   samples_per_symbol = phase1_samples_per_symbol;
   symbol_rate = phase1_symbol_rate;
   system_channel_rate = symbol_rate * samples_per_symbol;
-
+  modulation_selector = gr::blocks::selector::make(sizeof(gr_complex), 1 , 2);
   valve = gr::blocks::copy::make(sizeof(gr_complex));
   valve->set_enabled(false);
   lo = gr::analog::sig_source_c::make(input_rate, gr::analog::GR_SIN_WAVE, 0, 1.0, 0.0);
@@ -162,6 +162,7 @@ void p25_recorder::initialize_prefilter() {
   connect(mixer, 0, lowpass_filter, 0);
   connect(lowpass_filter, 0, arb_resampler, 0);
   connect(arb_resampler, 0, cutoff_filter, 0);
+  connect(cutoff_filter, 0, modulation_selector, 0);
 }
 void p25_recorder::initialize_fsk4() {
   const double phase1_channel_rate = phase1_symbol_rate * phase1_samples_per_symbol;
@@ -192,16 +193,16 @@ void p25_recorder::initialize_fsk4() {
   fsk4_demod = gr::op25_repeater::fsk4_demod_ff::make(tune_queue, phase1_channel_rate, phase1_symbol_rate);
 
   if (squelch_db != 0) {
-    connect(cutoff_filter, 0, squelch, 0);
+    connect(modulation_selector, 0, squelch, 0);
     connect(squelch, 0, pll_freq_lock, 0);
   } else {
-    connect(cutoff_filter, 0, pll_freq_lock, 0);
+    connect(modulation_selector, 0, pll_freq_lock, 0);
   }
   connect(pll_freq_lock, 0, pll_amp, 0);
   connect(pll_amp, 0, noise_filter, 0);
   connect(noise_filter, 0, sym_filter, 0);
   connect(sym_filter, 0, fsk4_demod, 0);
-  connect(fsk4_demod, 0, slicer, 0);
+  connect(fsk4_demod, 0, modulation_combiner, 0);
 }
 
 void p25_recorder::initialize_qpsk() {
@@ -231,19 +232,22 @@ void p25_recorder::initialize_qpsk() {
   rescale = gr::blocks::multiply_const_ff::make((1 / (pi / 4)));
 
   if (squelch_db != 0) {
-    connect(cutoff_filter, 0, squelch, 0);
+    connect(modulation_selector, 1, squelch, 0);
     connect(squelch, 0, agc, 0);
   } else {
-    connect(cutoff_filter, 0, agc, 0);
+    connect(modulation_selector, 1, agc, 0);
   }
   connect(agc, 0, costas_clock, 0);
   connect(costas_clock, 0, diffdec, 0);
   connect(diffdec, 0, to_float, 0);
   connect(to_float, 0, rescale, 0);
-  connect(rescale, 0, slicer, 0);
+  connect(rescale, 0, modulation_combiner, 1);
 }
 
 void p25_recorder::initialize_p25() {
+
+  modulation_combiner = gr::blocks::selector::make(sizeof(gr_complex), 2 , 1);
+
   //OP25 Slicer
   const float l[] = {-2.0, 0.0, 2.0, 4.0};
   std::vector<float> slices(l, l + sizeof(l) / sizeof(l[0]));
@@ -266,7 +270,7 @@ void p25_recorder::initialize_p25() {
   op25_frame_assembler = gr::op25_repeater::p25_frame_assembler::make(0, silence_frames, wireshark_host, udp_port, verbosity, do_imbe, do_output, do_msgq, rx_queue, do_audio_output, do_tdma, do_crypt);
   converter = gr::blocks::short_to_float::make(1, 32768.0);
   levels = gr::blocks::multiply_const_ff::make(source->get_digital_levels());
-
+  connect(modulation_combiner, 0, slicer, 0);
   connect(slicer, 0, op25_frame_assembler, 0);
   connect(op25_frame_assembler, 0, converter, 0);
   connect(converter, 0, levels, 0);
@@ -295,11 +299,15 @@ void p25_recorder::initialize(Source *src, gr::blocks::nonstop_wavfile_sink::spt
 
   initialize_prefilter();
   initialize_p25();
+  initialize_fsk4();
+  initialize_qpsk();
 
   if (!qpsk_mod) {
-    initialize_fsk4();
+    modulation_selector->set_output_index(0);
+    modulation_combiner->set_input_index(0);
   } else {
-    initialize_qpsk();
+    modulation_selector->set_output_index(1);
+    modulation_combiner->set_input_index(1);    
   }
 }
 

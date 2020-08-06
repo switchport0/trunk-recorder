@@ -29,6 +29,7 @@
 #include <gnuradio/block.h>
 #include <gnuradio/blocks/copy.h>
 #include <gnuradio/blocks/short_to_float.h>
+#include <gnuradio/blocks/selector.h>
 
 #if GNURADIO_VERSION < 0x030800
 #include <gnuradio/analog/sig_source_c.h>
@@ -126,6 +127,8 @@ protected:
   gr::op25_repeater::gardner_costas_cc::sptr costas_clock;
   gr::blocks::nonstop_wavfile_sink::sptr wav_sink;
   gr::blocks::copy::sptr valve;
+  gr::blocks::selector::sptr modulation_selector;
+  gr::blocks::selector::sptr modulation_combiner;
   //gr::blocks::multiply_const_ss::sptr levels;
   gr::blocks::multiply_const_ff::sptr levels;
 

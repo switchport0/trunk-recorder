@@ -93,7 +93,7 @@ void p25_recorder::initialize_prefilter() {
   samples_per_symbol = phase1_samples_per_symbol;
   symbol_rate = phase1_symbol_rate;
   system_channel_rate = symbol_rate * samples_per_symbol;
-  modulation_selector = gr::blocks::selector::make(sizeof(gr_complex), 1 , 2);
+  modulation_selector = gr::blocks::selector::make(sizeof(gr_complex), 0 , 0);
   valve = gr::blocks::copy::make(sizeof(gr_complex));
   valve->set_enabled(false);
   lo = gr::analog::sig_source_c::make(input_rate, gr::analog::GR_SIN_WAVE, 0, 1.0, 0.0);
@@ -246,7 +246,7 @@ void p25_recorder::initialize_qpsk() {
 
 void p25_recorder::initialize_p25() {
 
-  modulation_combiner = gr::blocks::selector::make(sizeof(float), 2 , 1);
+  modulation_combiner = gr::blocks::selector::make(sizeof(float), 0 , 0);
 
   //OP25 Slicer
   const float l[] = {-2.0, 0.0, 2.0, 4.0};

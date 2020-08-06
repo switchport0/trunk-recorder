@@ -246,7 +246,7 @@ void p25_recorder::initialize_qpsk() {
 
 void p25_recorder::initialize_p25() {
 
-  modulation_combiner = gr::blocks::selector::make(sizeof(gr_complex), 2 , 1);
+  modulation_combiner = gr::blocks::selector::make(sizeof(float), 2 , 1);
 
   //OP25 Slicer
   const float l[] = {-2.0, 0.0, 2.0, 4.0};

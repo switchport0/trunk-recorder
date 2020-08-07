@@ -302,6 +302,11 @@ void p25_recorder::initialize(Source *src, gr::blocks::nonstop_wavfile_sink::spt
   initialize_fsk4();
   initialize_qpsk();
 
+
+}
+
+void p25_recorder::set_qpsk_mod(bool mod) {
+  qpsk_mod = mod;
   if (!qpsk_mod) {
     modulation_selector->set_output_index(0);
     modulation_combiner->set_input_index(0);
@@ -309,6 +314,7 @@ void p25_recorder::initialize(Source *src, gr::blocks::nonstop_wavfile_sink::spt
     modulation_selector->set_output_index(1);
     modulation_combiner->set_input_index(1);    
   }
+  
 }
 
 void p25_recorder::switch_tdma(bool phase2) {

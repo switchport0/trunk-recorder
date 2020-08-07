@@ -72,6 +72,7 @@ public:
   virtual void start(Call *call){};
   virtual void stop(){};
   virtual void set_tdma_slot(int slot){};
+  virtual  void set_qpsk_mod(bool mod){};
   virtual double get_freq() { return 0; };
   virtual Source *get_source() { return NULL; };
   virtual Call_Source *get_source_list() { return NULL; };

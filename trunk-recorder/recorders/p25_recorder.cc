@@ -94,8 +94,10 @@ void p25_recorder::initialize_prefilter() {
   symbol_rate = phase1_symbol_rate;
   system_channel_rate = symbol_rate * samples_per_symbol;
   modulation_selector = gr::blocks::selector::make(sizeof(gr_complex), 0 , 0);
+  modulation_selector->set_enabled(false);
   valve = gr::blocks::copy::make(sizeof(gr_complex));
-  valve->set_enabled(false);
+  //valve->set_enabled(false);
+  valve->set_enabled(true);
   lo = gr::analog::sig_source_c::make(input_rate, gr::analog::GR_SIN_WAVE, 0, 1.0, 0.0);
   mixer = gr::blocks::multiply_cc::make();
 
@@ -301,8 +303,6 @@ void p25_recorder::initialize(Source *src, gr::blocks::nonstop_wavfile_sink::spt
   initialize_p25();
   initialize_fsk4();
   initialize_qpsk();
-
-
 }
 
 void p25_recorder::set_qpsk_mod(bool mod) {
@@ -465,7 +465,8 @@ void p25_recorder::stop() {
     BOOST_LOG_TRIVIAL(info) << "\t- Stopping P25 Recorder Num [" << rec_num << "]\tTG: " << this->call->get_talkgroup_display() << "\tFreq: " << FormatFreq(chan_freq) << " \tTDMA: " << d_phase2_tdma << "\tSlot: " << tdma_slot;
 
     state = inactive;
-    valve->set_enabled(false);
+    //valve->set_enabled(false);
+    modulation_selector->set_enabled(false);
     wav_sink->close();
     //Rx_Status rx_status = op25_frame_assembler->get_rx_status();
     op25_frame_assembler->reset_rx_status();
@@ -524,7 +525,8 @@ void p25_recorder::start(Call *call) {
 
     wav_sink->open(call->get_filename());
     state = active;
-    valve->set_enabled(true);
+    modulation_selector->set_enabled(true);
+    //valve->set_enabled(true);
     wav_sink->set_call(call);
     recording_count++;
   } else {

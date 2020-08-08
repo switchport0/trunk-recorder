@@ -807,7 +807,7 @@ bool retune_recorder(TrunkMessage message, Call *call) {
     call->set_tdma_slot(message.tdma_slot);
   }
 
-  recorder->set_qpsk_mod(false);
+  
 
   if (message.freq != call->get_freq()) {
     if ((source->get_min_hz() <= message.freq) && (source->get_max_hz() >= message.freq)) {

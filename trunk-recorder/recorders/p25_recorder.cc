@@ -233,12 +233,12 @@ void p25_recorder::initialize_qpsk() {
   // QPSK: convert from radians such that signal is in -3/-1/+1/+3
   rescale = gr::blocks::multiply_const_ff::make((1 / (pi / 4)));
 
-  if (squelch_db != 0) {
+  /*if (squelch_db != 0) {
     connect(modulation_selector, 1, squelch, 0);
     connect(squelch, 0, agc, 0);
-  } else {
+  } else {*/
     connect(modulation_selector, 1, agc, 0);
-  }
+ // }
   connect(agc, 0, costas_clock, 0);
   connect(costas_clock, 0, diffdec, 0);
   connect(diffdec, 0, to_float, 0);

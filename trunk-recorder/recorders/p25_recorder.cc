@@ -468,6 +468,7 @@ void p25_recorder::stop() {
     state = inactive;
     //valve->set_enabled(false);
     modulation_selector->set_enabled(false);
+    this->set_qpsk_mod(false);
     wav_sink->close();
     //Rx_Status rx_status = op25_frame_assembler->get_rx_status();
     op25_frame_assembler->reset_rx_status();

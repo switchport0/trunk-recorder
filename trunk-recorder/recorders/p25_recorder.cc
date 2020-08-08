@@ -499,7 +499,7 @@ void p25_recorder::start(Call *call) {
     chan_freq = call->get_freq();
     this->call = call;
 
-    recorder->set_qpsk_mod(false);
+    this->set_qpsk_mod(false);
     set_tdma(call->get_phase2_tdma());
 
     if (call->get_phase2_tdma()) {

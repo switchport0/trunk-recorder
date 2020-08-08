@@ -322,9 +322,6 @@ void p25_recorder::switch_tdma(bool phase2) {
   double fmax;
   const double pi = M_PI;
 
-  if (!qpsk_mod) {
-    return;
-  }
 
   if (phase2) {
     d_phase2_tdma = true;
@@ -354,7 +351,7 @@ void p25_recorder::switch_tdma(bool phase2) {
 }
 
 void p25_recorder::set_tdma(bool phase2) {
-  if (phase2 != d_phase2_tdma) {
+  if ((phase2 != d_phase2_tdma) && qpsk_mod) {
     switch_tdma(phase2);
   }
 }
@@ -504,7 +501,7 @@ void p25_recorder::start(Call *call) {
     this->call = call;
 
     this->set_qpsk_mod(false);
-    set_tdma(call->get_phase2_tdma());
+/*    set_tdma(call->get_phase2_tdma());
 
     if (call->get_phase2_tdma()) {
 
@@ -521,7 +518,7 @@ void p25_recorder::start(Call *call) {
 
     if (!qpsk_mod) {
       reset();
-    }
+    }*/
     BOOST_LOG_TRIVIAL(info) << "\t- Starting P25 Recorder Num [" << rec_num << "]\tTG: " << this->call->get_talkgroup_display() << "\tFreq: " << FormatFreq(chan_freq) << " \tTDMA: " << call->get_phase2_tdma() << "\tSlot: " << call->get_tdma_slot();
 
     int offset_amount = (center_freq - chan_freq);

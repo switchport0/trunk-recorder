@@ -302,7 +302,7 @@ void p25_recorder::initialize(Source *src, gr::blocks::nonstop_wavfile_sink::spt
   initialize_prefilter();
   initialize_p25();
   initialize_fsk4();
-  //initialize_qpsk();
+  initialize_qpsk();
 }
 
 void p25_recorder::set_qpsk_mod(bool mod) {

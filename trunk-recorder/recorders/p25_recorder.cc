@@ -237,7 +237,7 @@ void p25_recorder::initialize_qpsk() {
     connect(modulation_selector, 1, squelch, 0);
     connect(squelch, 0, agc, 0);
   } else {*/
-//    connect(modulation_selector, 1, agc, 0);
+    connect(modulation_selector, 1, agc, 0);
  // }
   connect(agc, 0, costas_clock, 0);
   connect(costas_clock, 0, diffdec, 0);

@@ -94,10 +94,10 @@ void p25_recorder::initialize_prefilter() {
   symbol_rate = phase1_symbol_rate;
   system_channel_rate = symbol_rate * samples_per_symbol;
   modulation_selector = gr::blocks::selector::make(sizeof(gr_complex), 0 , 0);
-  modulation_selector->set_enabled(false);
+  modulation_selector->set_enabled(true);
   valve = gr::blocks::copy::make(sizeof(gr_complex));
-  //valve->set_enabled(false);
-  valve->set_enabled(true);
+  valve->set_enabled(false);
+  //valve->set_enabled(true);
   lo = gr::analog::sig_source_c::make(input_rate, gr::analog::GR_SIN_WAVE, 0, 1.0, 0.0);
   mixer = gr::blocks::multiply_cc::make();
 
@@ -193,7 +193,7 @@ void p25_recorder::initialize_fsk4() {
   //FSK4: FSK4 Demod - locked at Phase 1 rates, since it can only be Phase 1
   tune_queue = gr::msg_queue::make(20);
   fsk4_demod = gr::op25_repeater::fsk4_demod_ff::make(tune_queue, phase1_channel_rate, phase1_symbol_rate);
-
+/*
   if (squelch_db != 0) {
     connect(modulation_selector, 0, squelch, 0);
     connect(squelch, 0, pll_freq_lock, 0);
@@ -204,7 +204,10 @@ void p25_recorder::initialize_fsk4() {
   connect(pll_amp, 0, noise_filter, 0);
   connect(noise_filter, 0, sym_filter, 0);
   connect(sym_filter, 0, fsk4_demod, 0);
-  connect(fsk4_demod, 0, modulation_combiner, 0);
+  connect(fsk4_demod, 0, modulation_combiner, 0);*/
+     connect(modulation_selector, 0, pll_freq_lock, 0);
+
+  connect(pll_freq_lock, 0, modulation_combiner, 0);
 }
 
 void p25_recorder::initialize_qpsk() {
@@ -232,18 +235,25 @@ void p25_recorder::initialize_qpsk() {
 
   // QPSK: convert from radians such that signal is in -3/-1/+1/+3
   rescale = gr::blocks::multiply_const_ff::make((1 / (pi / 4)));
-
-  /*if (squelch_db != 0) {
+/*
+  if (squelch_db != 0) {
     connect(modulation_selector, 1, squelch, 0);
     connect(squelch, 0, agc, 0);
-  } else {*/
+  } else {
     connect(modulation_selector, 1, agc, 0);
- // }
+  }
   connect(agc, 0, costas_clock, 0);
   connect(costas_clock, 0, diffdec, 0);
   connect(diffdec, 0, to_float, 0);
   connect(to_float, 0, rescale, 0);
+  connect(rescale, 0, modulation_combiner, 1);*/
+ 
+
+  connect(modulation_selector, 1, to_float, 0);
+  connect(to_float, 0, rescale, 0);
   connect(rescale, 0, modulation_combiner, 1);
+
+
 }
 
 void p25_recorder::initialize_p25() {
@@ -307,6 +317,8 @@ void p25_recorder::initialize(Source *src, gr::blocks::nonstop_wavfile_sink::spt
 
 void p25_recorder::set_qpsk_mod(bool mod) {
   qpsk_mod = mod;
+      modulation_combiner->set_output_index(0);
+    modulation_selector->set_input_index(0);
   if (!qpsk_mod) {
     modulation_selector->set_output_index(0);
     modulation_combiner->set_input_index(0);
@@ -466,9 +478,9 @@ void p25_recorder::stop() {
     BOOST_LOG_TRIVIAL(info) << "\t- Stopping P25 Recorder Num [" << rec_num << "]\tTG: " << this->call->get_talkgroup_display() << "\tFreq: " << FormatFreq(chan_freq) << " \tTDMA: " << d_phase2_tdma << "\tSlot: " << tdma_slot;
 
     state = inactive;
-    //valve->set_enabled(false);
-    modulation_selector->set_enabled(false);
-    this->set_qpsk_mod(false);
+    valve->set_enabled(false);
+    //modulation_selector->set_enabled(false);
+    this->set_qpsk_mod(true);
     wav_sink->close();
     //Rx_Status rx_status = op25_frame_assembler->get_rx_status();
     op25_frame_assembler->reset_rx_status();
@@ -501,7 +513,7 @@ void p25_recorder::start(Call *call) {
     chan_freq = call->get_freq();
     this->call = call;
 
-    this->set_qpsk_mod(false);
+    this->set_qpsk_mod(true);
 /*    set_tdma(call->get_phase2_tdma());
 
     if (call->get_phase2_tdma()) {
@@ -528,8 +540,8 @@ void p25_recorder::start(Call *call) {
 
     wav_sink->open(call->get_filename());
     state = active;
-    modulation_selector->set_enabled(true);
-    //valve->set_enabled(true);
+    //modulation_selector->set_enabled(true);
+    valve->set_enabled(true);
     wav_sink->set_call(call);
     recording_count++;
   } else {

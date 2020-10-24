@@ -127,7 +127,7 @@ analog_recorder::analog_recorder(Source *src)
   // reverse squelch. If the power is then BELOW a threshold, open the squelch.
 
   // Non-blocking as we are using squelch_two as a gate.
-  squelch = gr::analog::pwr_squelch_cc::make(squelch_db, 0.01, 10, false);
+  squelch = gr::analog::pwr_squelch_cc::make(squelch_db, 0.01, 10, true);
 
   //  based on squelch code form ham2mon
   // set low -200 since its after demod and its just gate for previous squelch so that the audio

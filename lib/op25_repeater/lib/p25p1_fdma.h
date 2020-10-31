@@ -71,7 +71,7 @@ private:
   bool d_do_imbe;
   bool d_do_output;
   bool d_do_msgq;
-	bool d_do_audio_output;
+  bool d_do_audio_output;
   bool d_do_nocrypt;
   Rx_Status rx_status;
   double error_history[20];
@@ -79,6 +79,7 @@ private:
   std::deque<int16_t>& output_queue;
   p25_framer *framer;
   long curr_src_id;
+  bool terminate_call;
   struct timeval last_qtime;
   p25p1_voice_decode p1voice_decode;
         const op25_audio& op25audio;
@@ -101,6 +102,7 @@ private:
 
   // Where all the action really happens
   long get_curr_src_id();
+  bool get_call_terminated();
   void reset_rx_status();
   Rx_Status get_rx_status();
   void clear();

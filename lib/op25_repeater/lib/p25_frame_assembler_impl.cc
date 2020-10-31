@@ -204,7 +204,7 @@ p25_frame_assembler_impl::general_work(int                        noutput_items,
         //  nitems_written(0));
         add_item_tag(0, nitems_written(0), d_tag_key, pmt::from_long(src_id), d_tag_src);
       }
-
+      BOOST_LOG_TRIVIAL(info) << "Amt Prod: " << amt_produce << " SRC ID: " << src_id;
       for (int i = 0; i < amt_produce; i++) {
         out[i] = output_queue[i];
       }
@@ -216,11 +216,18 @@ p25_frame_assembler_impl::general_work(int                        noutput_items,
          amt_produce = noutput_items;
          }*/
       silence_frame_count = d_silence_frames;
-    } else if (silence_frame_count > 0) {
+      if (p1fdma.get_call_terminated()) {
+        BOOST_LOG_TRIVIAL(info) << "Call Terminated, amount produced: " << amt_produce << " SRC: " << src_id;
+      }
+    } else if (p1fdma.get_call_terminated()) {
+        BOOST_LOG_TRIVIAL(info) << "Call Terminated, NO amount produced: " << amt_produce << " SRC: " << p1fdma.get_curr_src_id();
+      }
+    
+    /*if (silence_frame_count > 0) {
       std::fill(out, out + noutput_items, 0);
       amt_produce = noutput_items;
       silence_frame_count--;
-    }
+    }*/
   }
   consume_each(ninput_items[0]);
 

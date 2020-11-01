@@ -113,6 +113,7 @@ public:
   std::string get_system_type();
   double get_final_length();
 
+  long get_current_source(); 
   System *get_system();
 
 protected:

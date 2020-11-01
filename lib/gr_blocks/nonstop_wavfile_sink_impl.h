@@ -76,7 +76,8 @@ protected:
 	 * assumes d_fp is a valid file pointer, should thus only be called by
 	 * other methods.
 	 */
-	void close_wav();
+	 
+	void close_wav(bool close_call);
 
 protected:
 	bool stop();
@@ -103,7 +104,6 @@ public:
 	virtual ~nonstop_wavfile_sink_impl();
 	char *get_filename();
 	virtual bool open(Call *call);
-	virtual void close();
 
 	void set_sample_rate(unsigned int sample_rate);
 	void set_bits_per_sample(int bits_per_sample);
@@ -118,6 +118,7 @@ public:
 	gr_vector_const_void_star &input_items,
 	gr_vector_void_star &output_items);
 
+	virtual void close();
 	time_t get_start_time();
 	time_t get_stop_time();
 

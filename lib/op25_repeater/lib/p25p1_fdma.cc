@@ -381,11 +381,11 @@ void
 p25p1_fdma::process_TTDU()
 {
 	process_duid(framer->duid, framer->nac, NULL, 0);
-
+/*
 	if (framer->duid == 0x3 || framer->duid == 0xf) {
 		fprintf (stderr, "%s NAC 0x%03x TDU3:  \n", logts.get(), framer->nac);
 		fprintf (stderr, "end of voice transmission\n");
-	}
+	}*/
 	if ((d_do_imbe || d_do_audio_output) && (framer->duid == 0x3 || framer->duid == 0xf)) {  // voice termination
 		op25audio.send_audio_flag(op25_audio::DRAIN);
 		terminate_call = true;

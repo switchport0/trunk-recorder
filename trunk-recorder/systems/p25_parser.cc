@@ -323,7 +323,6 @@ std::vector<TrunkMessage> P25Parser::decode_tsbk(boost::dynamic_bitset<> &tsbk, 
         }
 
         os << "tsbk02\tGrant Update\tChannel ID: " << std::setw(5) << ch2 << "\tFreq: " << FormatFreq(f2) << "\tga " << std::setw(7) << ga2 << "\tTDMA " << get_tdma_slot(ch2, sys_num);
-
         message.meta = os.str();
         //BOOST_LOG_TRIVIAL(trace) << os;
       }
@@ -429,7 +428,8 @@ std::vector<TrunkMessage> P25Parser::decode_tsbk(boost::dynamic_bitset<> &tsbk, 
       message.tdma_slot = 0;
     }
 
-    BOOST_LOG_TRIVIAL(trace) << "tsbk04\tUnit to Unit Chan Grant\tChannel ID: " << std::setw(5) << ch << "\tFreq: " << FormatFreq(f) << "\tTarget ID: " << std::setw(7) << ta << "\tTDMA " << get_tdma_slot(ch, sys_num) << "\tSource ID: " << sa;
+    os << "tsbk04\tUnit to Unit Chan Grant\tChannel ID: " << std::setw(5) << ch << "\tFreq: " << FormatFreq(f) << "\tTarget ID: " << std::setw(7) << ta << "\tTDMA " << get_tdma_slot(ch, sys_num) << "\tSource ID: " << sa;
+    message.meta = os.str();
   } else if (opcode == 0x05) { // Unit To Unit Answer Request
     BOOST_LOG_TRIVIAL(trace) << "tsbk05";
   } else if (opcode == 0x06) { //  Unit to Unit Voice Channel Grant Update (UU_V_CH_GRANT_UPDT)
@@ -459,7 +459,8 @@ std::vector<TrunkMessage> P25Parser::decode_tsbk(boost::dynamic_bitset<> &tsbk, 
     }
     message.emergency = emergency;
     message.encrypted = encrypted;
-    BOOST_LOG_TRIVIAL(trace) << "tsbk06\tUnit to Unit Chan Update\tChannel ID: " << std::setw(5) << ch << "\tFreq: " << f / 1000000.0 << "\tTarget ID: " << std::setw(7) << ta << "\tTDMA " << get_tdma_slot(ch, sys_num) << "\tSource ID: " << sa;
+    os << "tsbk06\tUnit to Unit Chan Update\tChannel ID: " << std::setw(5) << ch << "\tFreq: " << f / 1000000.0 << "\tTarget ID: " << std::setw(7) << ta << "\tTDMA " << get_tdma_slot(ch, sys_num) << "\tSource ID: " << sa;
+    message.meta = os.str();
   } else if (opcode == 0x08) { // Telephone Interconnect Voice Channel Grant
     BOOST_LOG_TRIVIAL(trace) << "tsbk08";
   } else if (opcode == 0x09) { // Telephone Interconnect Voice Channel Grant Update
@@ -685,7 +686,8 @@ std::vector<TrunkMessage> P25Parser::decode_tsbk(boost::dynamic_bitset<> &tsbk, 
       message.sys_id = syid;
       message.freq = f1;
     }
-    BOOST_LOG_TRIVIAL(trace) << "tsbk3b net stat: wacn " << std::dec << wacn << " syid " << syid << " ch1 " << ch1 << "(" << channel_id_to_string(ch1, sys_num) << ") ";
+    os << "tsbk3b net stat: wacn " << std::dec << wacn << " syid " << syid << " ch1 " << ch1 << "(" << channel_id_to_string(ch1, sys_num) << ") ";
+    message.meta = os.str();
   } else if (opcode == 0x3c) { // adjacent status
     unsigned long rfid = bitset_shift_mask(tsbk, 48, 0xff);
     unsigned long stid = bitset_shift_mask(tsbk, 40, 0xff);
@@ -727,7 +729,8 @@ std::vector<TrunkMessage> P25Parser::decode_tsbk(boost::dynamic_bitset<> &tsbk, 
         1,             // slots
         bw * .125};
     add_channel(iden, temp_chan, sys_num);
-    BOOST_LOG_TRIVIAL(trace) << "tsbk3d iden id " << std::dec << iden << " toff " << toff * 0.25 << " spac " << spac * 0.125 << " freq " << freq * 0.000005;
+    os << "tsbk3d iden id " << std::dec << iden << " toff " << toff * 0.25 << " spac " << spac * 0.125 << " freq " << freq * 0.000005;
+    message.meta = os.str();
   } else {
     BOOST_LOG_TRIVIAL(trace) << "tsbk other " << std::hex << opcode;
     return messages;

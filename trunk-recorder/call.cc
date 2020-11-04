@@ -155,7 +155,21 @@ void Call::end_call() {
         }
         myfile << "{ \"freq\": " << std::fixed << freq_list[i].freq << ", \"time\": " << freq_list[i].time << ", \"pos\": " << freq_list[i].position << ", \"len\": " << freq_list[i].total_len << ", \"error_count\": " << freq_list[i].error_count << ", \"spike_count\": " << freq_list[i].spike_count << "}";
       }
-      myfile << "]\n";
+      
+      if (sys->get_transmission_mode()) {
+        myfile << "],\n";
+        myfile << "\"transmissionList\": [ ";
+
+      for (std::size_t i = 0; i < transmission_list.size(); i++) {
+        if (i != 0) {
+          myfile << ", ";
+        }
+        myfile << "{\"src\": " << std::fixed << transmission_list[i].source << ", \"startTime\": " << transmission_list[i].start_time << ", \"stopTime\": " << transmission_list[i].stop_time << ", \"filename\": \"" << transmission_list[i].filename << "\"}";
+      }
+      myfile << " ]\n";
+      } else {
+        myfile << "]\n";
+      }
       myfile << "}\n";
       myfile.close();
     }
@@ -227,7 +241,7 @@ Recorder *Call::get_debug_recorder() {
 
 void Call::set_recorder(Recorder *r) {
   recorder = r;
-  BOOST_LOG_TRIVIAL(info) << "[" << sys->get_short_name() << "]\tTG: " << this->get_talkgroup_display() << "\tFreq: " << FormatFreq(this->get_freq()) << "\t\u001b[32mStarting Recorder on Src: " << recorder->get_source()->get_device() << "\u001b[0m";
+  BOOST_LOG_TRIVIAL(info) << "[" << sys->get_short_name() << "]\tTG: " << this->get_talkgroup_display() << "\tFreq: " << FormatFreq(this->get_freq()) << "\t\u001b[32mStarting Recorder on Src: " << recorder->get_source()->get_device() << " For Source ID: " <<  this->get_current_source() << "\u001b[0m";
 }
 
 Recorder *Call::get_recorder() {
@@ -324,9 +338,18 @@ std::vector<Call_Source> Call::get_source_list() {
   return src_list;
 }
 
+void Call::clear_transmission_list() {
+  transmission_list.clear();
+  transmission_list.shrink_to_fit();
+}
+
 void Call::clear_src_list() {
   src_list.clear();
   src_list.shrink_to_fit();
+}
+
+void Call::add_transmission(Transmission t) {
+  transmission_list.push_back(t);
 }
 
 long Call::get_source_count() {
@@ -510,6 +533,10 @@ char *Call::get_sigmf_filename() {
 
 char *Call::get_debug_filename() {
   return debug_filename;
+}
+
+bool Call::get_transmission_mode() {
+  return sys->get_transmission_mode();
 }
 
 std::string Call::get_system_type() {

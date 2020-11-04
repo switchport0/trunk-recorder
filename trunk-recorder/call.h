@@ -6,6 +6,14 @@
 #include <sys/time.h>
 #include <vector>
 
+struct Transmission {
+  long source;
+  long start_time;
+  long stop_time;
+  double freq;
+  char filename[255];
+};
+
 struct Call_Source {
   long source;
   long time;
@@ -105,8 +113,10 @@ public:
   void set_talkgroup_display_format(std::string format);
   void set_talkgroup_tag(std::string tag);
   void clear_src_list();
+  void clear_transmission_list();
   boost::property_tree::ptree get_stats();
-
+  void add_transmission(Transmission t);
+  bool get_transmission_mode();
   bool add_signal_source(long src, const char *signaling_type, gr::blocks::SignalType signal);
 
   std::string get_talkgroup_tag();
@@ -125,6 +135,7 @@ protected:
   long curr_src_id;
   Call_Error error_list[50];
   std::vector<Call_Source> src_list;
+  std::vector<Transmission> transmission_list;
   Call_Freq freq_list[50];
   long error_list_count;
   long freq_count;

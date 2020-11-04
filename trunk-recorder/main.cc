@@ -891,20 +891,20 @@ void handle_call(TrunkMessage message, System *sys) {
       if ((call->get_freq() != message.freq) || (call->get_tdma_slot() != message.tdma_slot) || (call->get_phase2_tdma() != message.phase2_tdma)) {
         if (call->get_state() == recording) {
           // see if we can retune the recorder, You may not be able to if the Freq is beyond what the current source can handle
-          int retuned = retune_recorder(message, call);
+          /*int retuned = retune_recorder(message, call);
 
-          if (!retuned) {
+          if (!retuned) {*/
             // we want to keep this call recording and now start a recording of the new call on another recorder
             call_found = false;
             retune_failed = true;
             ++it; // go on to the next call, remember there may be two calls
-          } else {
+          /*} else {
             // if you did retune, update the call info
             BOOST_LOG_TRIVIAL(info) << "[" << sys->get_short_name() << "]\tTG: " << call->get_talkgroup_display() << "\tFreq: " << FormatFreq(call->get_freq()) << "\tUpdate Retuning - New Freq: " << FormatFreq(message.freq) << "\tElapsed: " << call->elapsed() << "s \tSince update: " << call->since_last_update() << "s";
             call->update(message);
             call_retune = true;
             break;
-          }
+          }*/
         } else {
           // the Call is not being recorded, simply update and continue
           call->set_freq(message.freq);
@@ -914,8 +914,7 @@ void handle_call(TrunkMessage message, System *sys) {
           break;
         }
       } else {
-        if (call->get_state() == recording) {
-          if (message.source && (message.source != call->get_current_source())) {
+        if (!call->get_transmission_mode() && (call->get_state() == recording) && message.source && (message.source != call->get_current_source())) {
             BOOST_LOG_TRIVIAL(info) << "Source Switch [" << sys->get_short_name() << "]\tTG: " << call->get_talkgroup_display() << "\tFreq: " << FormatFreq(call->get_freq()) << "\tElapsed: " << call->elapsed() << "s \tSince update: " << call->since_last_update() << "s" << message.source << " " << call->get_current_source();
 
             Recorder *recorder = call->get_recorder();
@@ -927,7 +926,7 @@ void handle_call(TrunkMessage message, System *sys) {
             it = calls.erase(it);
             delete call;
             break;
-          }
+          
         } else {
           // everything about the current recording matches, simply update the info
           call->update(message);

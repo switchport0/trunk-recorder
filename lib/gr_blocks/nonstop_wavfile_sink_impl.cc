@@ -195,7 +195,7 @@ void nonstop_wavfile_sink_impl::set_source(long src) {
       char formattedTalkgroup[62];
       snprintf(formattedTalkgroup, 61, "%c[%dm%10ld%c[0m", 0x1B, 35, d_current_call_talkgroup, 0x1B);
       std::string talkgroup_display = boost::lexical_cast<std::string>(formattedTalkgroup);
-      BOOST_LOG_TRIVIAL(error) << "[" << d_current_call_short_name << "]\t\033[0;34m" << d_current_call_num << "C\033[0m\tTG: " << formattedTalkgroup << "\tFreq: " << format_freq(d_current_call_freq) << "\tUnit ID externally set, ext: "<< src << "\tcurrent: " << curr_src_id << "\t samples: " << d_sample_count;
+      BOOST_LOG_TRIVIAL(info) << "[" << d_current_call_short_name << "]\t\033[0;34m" << d_current_call_num << "C\033[0m\tTG: " << formattedTalkgroup << "\tFreq: " << format_freq(d_current_call_freq) << "\tUnit ID externally set, ext: "<< src << "\tcurrent: " << curr_src_id << "\t samples: " << d_sample_count;
 
       if (d_sample_count > 0) {
         end_transmission();
@@ -229,6 +229,7 @@ void nonstop_wavfile_sink_impl::end_transmission() {
     strcpy(transmission.filename, current_filename); // Copy the filename
     strcpy(transmission.base_filename, current_base_filename);
     this->add_transmission(transmission);
+    curr_src_id = 0;
     d_sample_count = 0;
     d_first_work = true;
   } else {
@@ -319,10 +320,9 @@ int nonstop_wavfile_sink_impl::work(int noutput_items, gr_vector_const_void_star
     if (pmt::eq(this_key, tags[i].key)) {
       long src_id = pmt::to_long(tags[i].value);
       pos = d_sample_count + (tags[i].offset - nitems_read(0));
-      if (curr_src_id != src_id) {
-        //BOOST_LOG_TRIVIAL(info) << "Updated Voice Channel source id: " << src_id;
-      }
+
       if (src_id && (curr_src_id != src_id)) {
+        BOOST_LOG_TRIVIAL(info) << "Updated Voice Channel source id: " << src_id;
         curr_src_id = src_id;
       }
     }

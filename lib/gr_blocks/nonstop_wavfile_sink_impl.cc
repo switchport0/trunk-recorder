@@ -229,6 +229,14 @@ void nonstop_wavfile_sink_impl::end_transmission() {
     strcpy(transmission.filename, current_filename); // Copy the filename
     strcpy(transmission.base_filename, current_base_filename);
     this->add_transmission(transmission);
+
+
+
+    char formattedTalkgroup[62];
+    snprintf(formattedTalkgroup, 61, "%c[%dm%10ld%c[0m", 0x1B, 35, d_current_call_talkgroup, 0x1B);
+    std::string talkgroup_display = boost::lexical_cast<std::string>(formattedTalkgroup);
+    BOOST_LOG_TRIVIAL(info) << "[" << d_current_call_short_name << "]\t\033[0;34m" << d_current_call_num << "C\033[0m\tTG: " << formattedTalkgroup << "\tFreq: " << format_freq(d_current_call_freq) << "\tEnding Transmission \tSrc ID:  " << curr_src_id;
+    
     curr_src_id = 0;
     d_sample_count = 0;
     d_first_work = true;
@@ -309,6 +317,7 @@ int nonstop_wavfile_sink_impl::work(int noutput_items, gr_vector_const_void_star
   std::vector<gr::tag_t> tags;
   pmt::pmt_t this_key(pmt::intern("src_id"));
   pmt::pmt_t that_key(pmt::intern("terminate"));
+  pmt::pmt_t tg_key(pmt::intern("tg_id"));
   pmt::pmt_t squelch_key(pmt::intern("squelch:eob"));
   get_tags_in_range(tags, 0, nitems_read(0), nitems_read(0) + noutput_items);
 
@@ -322,15 +331,49 @@ int nonstop_wavfile_sink_impl::work(int noutput_items, gr_vector_const_void_star
       pos = d_sample_count + (tags[i].offset - nitems_read(0));
 
       if (src_id && (curr_src_id != src_id)) {
-        BOOST_LOG_TRIVIAL(info) << "Updated Voice Channel source id: " << src_id;
+        char formattedTalkgroup[62];
+        snprintf(formattedTalkgroup, 61, "%c[%dm%10ld%c[0m", 0x1B, 35, d_current_call_talkgroup, 0x1B);
+        std::string talkgroup_display = boost::lexical_cast<std::string>(formattedTalkgroup);
+        BOOST_LOG_TRIVIAL(error) << "[" << d_current_call_short_name << "]\t\033[0;34m" << d_current_call_num << "C\033[0m\tTG: " << formattedTalkgroup << "\tFreq: " << format_freq(d_current_call_freq) <<"\tUpdated Voice Channel source id: " << src_id;
         curr_src_id = src_id;
       }
     }
     if (pmt::eq(that_key, tags[i].key) || pmt::eq(squelch_key, tags[i].key)) {
+       /*char formattedTalkgroup[62];
+        snprintf(formattedTalkgroup, 61, "%c[%dm%10ld%c[0m", 0x1B, 35, d_current_call_talkgroup, 0x1B);
+        std::string talkgroup_display = boost::lexical_cast<std::string>(formattedTalkgroup);
+        BOOST_LOG_TRIVIAL(error) << "[" << d_current_call_short_name << "]\t\033[0;34m" << d_current_call_num << "C\033[0m\tTG: " << formattedTalkgroup << "\tFreq: " << format_freq(d_current_call_freq) <<"\tTERMINATOR source id: " << curr_src_id;
+       */
       d_termination_flag = true;
+    }
+    if (pmt::eq(tg_key, tags[i].key)) {
+      long tg_id = pmt::to_long(tags[i].value) << 4;
+
+      if (tg_id != d_current_call_talkgroup) {
+       char formattedTalkgroup[62];
+        snprintf(formattedTalkgroup, 61, "%c[%dm%10ld%c[0m", 0x1B, 35, d_current_call_talkgroup, 0x1B);
+        std::string talkgroup_display = boost::lexical_cast<std::string>(formattedTalkgroup);
+        BOOST_LOG_TRIVIAL(error) << "[" << d_current_call_short_name << "]\t\033[0;34m" << d_current_call_num << "C\033[0m\tTG: " << formattedTalkgroup << "\tFreq: " << format_freq(d_current_call_freq) <<"\tTG MISMATCH! Tag id: " << tg_id << " Current: " << d_current_call_talkgroup;
+       
+      }
     }
   }
   tags.clear();
+
+  // it is possible that we could get part of a transmission after a call has stopped. We shouldn't do any recording if this happens.... this could mean that we miss part of the recording though
+  /*if (curr_src_id == 0) {
+    if (noutput_items > 1) {
+      char formattedTalkgroup[62];
+      snprintf(formattedTalkgroup, 61, "%c[%dm%10ld%c[0m", 0x1B, 35, d_current_call_talkgroup, 0x1B);
+      std::string talkgroup_display = boost::lexical_cast<std::string>(formattedTalkgroup);
+      BOOST_LOG_TRIVIAL(error) << "[" << d_current_call_short_name << "]\t\033[0;34m" << d_current_call_num << "C\033[0m\tTG: " << formattedTalkgroup << "\tFreq: " << format_freq(d_current_call_freq) << "\tDropping samples - Current Source: " << curr_src_id << " num: " << noutput_items;
+
+    }
+    return noutput_items;
+  }*/
+
+
+
 
   // if the System for this call is in Transmission Mode, and we have a recording and we got a flag that a Transmission ended...
   int nwritten = dowork(noutput_items, input_items, output_items);

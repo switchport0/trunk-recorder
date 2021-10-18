@@ -199,13 +199,15 @@ int p25_frame_assembler_impl::general_work(int noutput_items,
 
     if (amt_produce > 0) {
       long src_id = p1fdma.get_curr_src_id();
-
+      long tg_id = p1fdma.get_curr_tg_id();
       if (src_id) {
         // fprintf(stderr,  "tagging source: %ld at %lu\n", src_id,
         //  nitems_written(0));
         add_item_tag(0, nitems_written(0), d_tag_key, pmt::from_long(src_id), d_tag_src);
       }
-
+      if (tg_id) {
+        add_item_tag(0, nitems_written(0), pmt::intern("tg_id"), pmt::from_long(tg_id), d_tag_src);
+      }
       for (int i = 0; i < amt_produce; i++) {
         out[i] = output_queue[i];
       }

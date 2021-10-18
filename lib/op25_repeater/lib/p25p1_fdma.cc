@@ -237,6 +237,11 @@ bool p25p1_fdma::get_call_terminated() {
 long p25p1_fdma::get_curr_src_id() {
   return curr_src_id;
 }
+
+long p25p1_fdma::get_curr_tg_id() {
+  return curr_tg_id;
+}
+
 void p25p1_fdma::clear() {
   p1voice_decode.clear();
 }
@@ -467,7 +472,8 @@ p25p1_fdma::process_LCW(std::vector<uint8_t>& HB)
 					uint16_t grpaddr = (lcw[4] << 8) + lcw[5];
 					uint32_t srcaddr = (lcw[6] << 16) + (lcw[7] << 8) + lcw[8];
 
-          curr_src_id = srcaddr;
+          			curr_src_id = srcaddr;
+					curr_tg_id = grpaddr;
 					s = "{\"srcaddr\" : " + std::to_string(srcaddr) + ", \"grpaddr\": " + std::to_string(grpaddr) + "}";
 					send_msg(s, -3);
 					if (d_debug >= 10)
@@ -737,6 +743,7 @@ p25p1_fdma::rx_sym (const uint8_t *syms, int nsyms)
 {
   struct timeval currtime;
   curr_src_id = 0;
+  curr_tg_id = 0;
 
   for (int i1 = 0; i1 < nsyms; i1++){
   	if(framer->rx_sym(syms[i1])) {   // complete frame was detected

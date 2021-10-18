@@ -79,6 +79,7 @@ private:
   std::deque<int16_t>& output_queue;
   p25_framer *framer;
   long curr_src_id;
+  long curr_tg_id;
   struct timeval last_qtime;
   bool terminate_call;
   p25p1_voice_decode p1voice_decode;
@@ -102,6 +103,7 @@ private:
 
   // Where all the action really happens
   long get_curr_src_id();
+  long get_curr_tg_id();
   void reset_rx_status();
   bool get_call_terminated();
   Rx_Status get_rx_status();

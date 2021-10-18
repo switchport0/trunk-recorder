@@ -347,9 +347,10 @@ int nonstop_wavfile_sink_impl::work(int noutput_items, gr_vector_const_void_star
       d_termination_flag = true;
     }
     if (pmt::eq(tg_key, tags[i].key)) {
-      long tg_id = pmt::to_long(tags[i].value) << 4;
+      long tg_id = pmt::to_long(tags[i].value);
+      long shifted_id = tg_id << 4;
 
-      if (tg_id != d_current_call_talkgroup) {
+      if ((tg_id != d_current_call_talkgroup) && (shifted_id != d_current_call_talkgroup)) {
        char formattedTalkgroup[62];
         snprintf(formattedTalkgroup, 61, "%c[%dm%10ld%c[0m", 0x1B, 35, d_current_call_talkgroup, 0x1B);
         std::string talkgroup_display = boost::lexical_cast<std::string>(formattedTalkgroup);
